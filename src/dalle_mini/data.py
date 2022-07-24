@@ -361,10 +361,9 @@ class Dataset:
 
         if self.streaming:
             return _dataloader_datasets_streaming(ds, epoch)
-        else:
-            if split == "train":
-                self.rng_dataset, input_rng = jax.random.split(self.rng_dataset)
-            return _dataloader_datasets_non_streaming(ds, input_rng)
+        if split == "train":
+            self.rng_dataset, input_rng = jax.random.split(self.rng_dataset)
+        return _dataloader_datasets_non_streaming(ds, input_rng)
 
     @property
     def length(self):
@@ -422,9 +421,7 @@ def filter_function(
         return False
     if max_clip_score is not None and example[clip_score_column] > max_clip_score:
         return False
-    if filter_column is not None and example[filter_column] != filter_value:
-        return False
-    return True
+    return filter_column is None or example[filter_column] == filter_value
 
 
 def preprocess_function(
